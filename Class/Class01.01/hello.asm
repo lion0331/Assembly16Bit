@@ -4,7 +4,7 @@
 assume cs:code,ds:data
 
 data segment
-message db 'hello welcome to masm16.',0dh,0ah,24h
+message db 'hello welcome to masm16 see Saga',0dh,0ah,24h
 data ends
 
 code segment
