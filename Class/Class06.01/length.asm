@@ -1,10 +1,9 @@
-;ç¨‹åºå
-;hello.asm
-;===================
+;³ÌĞòÃû:length.asm
+;ÏÔÊ¾dupÖµ
 assume cs:code,ds:data
 
 data segment
-message db 'hello welcome to masm16 see Saga',0dh,0ah,24h
+message	db 10 dup('A'),1,0dh,0ah,24h
 data ends
 
 code segment
@@ -16,6 +15,11 @@ start:
 	mov ah,9
 	int 21h
 	
+	mov ax,length message
+	mov bx,size message
+	mov cx,type message
+	mov dx,seg message
+
 	mov ax,4c00h
 	int 21h
 code ends

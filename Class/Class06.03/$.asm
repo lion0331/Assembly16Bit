@@ -1,20 +1,17 @@
-;ç¨‹åºå
-;hello.asm
+;³ÌĞòÃû
+;$.asm
 ;===================
 assume cs:code,ds:data
 
 data segment
-message db 'hello welcome to masm16 see Saga',0dh,0ah,24h
+array dw 1,2,$+4,3,4,$+4
 data ends
 
 code segment
 start:
 	mov ax,data
 	mov ds,ax
-	
-	mov dx,offset message
-	mov ah,9
-	int 21h
+
 	
 	mov ax,4c00h
 	int 21h
