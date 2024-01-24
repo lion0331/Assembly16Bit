@@ -1,4 +1,4 @@
-;程序名
+;程序名 显示一个字符串
 ;hello.asm
 ;===================
 assume cs:code,ds:data
