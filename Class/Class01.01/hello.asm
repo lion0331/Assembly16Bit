@@ -1,5 +1,5 @@
-;程序名 显示一个字符串
-;hello.asm
+;程序名 hello.asm
+;显示一个字符串
 ;===================
 assume cs:code,ds:data
 
