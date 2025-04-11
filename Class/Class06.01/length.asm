@@ -3,7 +3,7 @@
 assume cs:code,ds:data
 
 data segment
-message	db 10 dup('A'),1,0dh,0ah,24h
+message	db 1,10 dup('A'),0dh,0ah,24h
 data ends
 
 code segment
