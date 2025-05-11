@@ -1,94 +1,113 @@
-;例1:假设X和Y都是16位无符号数,写一个求表达式16*X+Y值的程序
-;设X,Y为16位无符号数,计算16X+Y的值
-;算法1:加法
-;程序结构:顺序结构
-;程序名:T34-1.asm
-;===================
-assume cs:code,ds:data
+; 例1:假设X和Y都是16位无符号数,写一个求表达式16*X+Y值的程序
+; 设X,Y为16位无符号数,计算16X+Y的值
+; 算法1:加法
+; 程序结构:顺序结构
+; 程序名:T34-1.asm
+; ===================
+assume cs:code, ds:data
 
 data segment
-X dw 1234h
-Y dw 5678h
-Z db 12 dup('$') ; 分配12个字节的空间用于存储字符串，以'$'结尾
+X dw 1234h         ; 定义16位无符号数X
+Y dw 5678h         ; 定义16位无符号数Y
+Z db 12 dup('$')   ; 分配12字节缓冲区存储十进制字符串（以'$'结尾）
 data ends
 
 code segment
 start:
-	mov ax,data
-	mov ds,ax
+    ; 初始化数据段寄存器
+    mov ax, data
+    mov ds, ax
 
-	mov ax,X
-	xor dx,dx;结果保存到DX:AX
-	;加法运算16*X
-	add ax,ax
-	adc dx,0
-	add ax,ax
-	adc dx,0
-	add ax,ax
-	adc dx,0
-	add ax,ax
-	adc dx,0
-	;16*X+Y
-	add ax,Y
-	adc dx,0
+    ; 计算16*X + Y
+    mov ax, X        ; AX = X
+    xor dx, dx       ; 清零DX（DX:AX组成32位寄存器）
 
-	;调用函数将DX:AX转换为字符串，并存储于Z
-	call to_str
-	;显示结果
-	mov dx,offset Z
-	mov ah,9
-	int 21h
-	
-	mov ax,4c00h
-	int 21h
+    ; 通过四次左移加法实现16*X（每次左移1位，共4次）
+    add ax, ax       ; AX = X*2
+    adc dx, 0        ; 处理进位（DX:AX = X*2）
+    add ax, ax       ; AX = X*4
+    adc dx, 0        ; 处理进位（DX:AX = X*4）
+    add ax, ax       ; AX = X*8
+    adc dx, 0        ; 处理进位（DX:AX = X*8）
+    add ax, ax       ; AX = X*16
+    adc dx, 0        ; 处理进位（DX:AX = X*16）
 
-	;将DX:AX中的32位无符号整数转换为字符串
-to_str proc
-	push cx
-	push bx
-	push si
+    ; 加上Y的值
+    add ax, Y        ; AX = 16*X + Y
+    adc dx, 0        ; 处理进位（DX:AX = 最终32位结果）
 
-	mov si, offset Z + 11 ; 指向Z倒数第二个位置
-	mov cx, 0 ; 计数器，记录有效字符数量
-	mov bx, 10
+    ; 将32位结果转换为十进制字符串
+    push ax          ; 保存低16位
+    push dx          ; 保存高16位
+    push si          ; 保存源指针
+    push bx          ; 保存余数寄存器
+    push cx          ; 保存除数
+
+    mov cx, 10       ; 设置除数CX=10（十进制转换）
+    lea di, Z + 10   ; 指向字符串缓冲区末尾（从后往前填充）
+    mov byte ptr [di + 1], '$' ; 设置字符串结束符
+
+    ; 检查是否为零的特殊情况
+    mov si, dx       ; 加载高16位到SI
+    or si, ax        ; 合并高低16位
+    jnz convert_loop ; 非零则进入转换循环
+    ; 处理零值情况
+    mov byte ptr [di], '0' ; 直接写入字符'0'
+    dec di           ; 调整di以保持与非零情况一致
+    jmp end_conversion
+
 convert_loop:
-	xor dx, dx ; 清零DX以进行除法操作
-	div bx ; AX / BX -> 商在AX, 余数在DX
-	add dl, '0' ; 将余数转为ASCII字符
-	mov [si], dl ; 存储ASCII字符到Z
-	dec si
-	inc cx
-	or ax, ax ; 检查商是否为0
-	jnz convert_loop ; 如果不为0，继续循环
+    call div32       ; 调用32位除法子程序（DX:AX / CX）
+    add bl, '0'      ; 将余数转换为ASCII字符
+    mov [di], bl     ; 存储字符到缓冲区
+    dec di           ; 移动指针到前一个位置(逆序存储)
+    ; 检查商是否为零
+    mov si, dx       ; 加载商的高16位
+    or si, ax        ; 合并商的32位
+    jnz convert_loop ; 非零则继续循环
 
-	; 处理DX中的高位部分
-high_part_loop:
-	test dx, dx ; 检查DX是否为0
-	jz end_convert
-	xor ax, ax ; 清零AX
-	mov ax, dx ; 将DX移到AX以便进行除法操作
-	xor dx, dx ; 清零DX以进行除法操作
-	div bx ; AX / BX -> 商在AX, 余数在DX
-	add dl, '0' ; 将余数转为ASCII字符
-	mov [si], dl ; 存储ASCII字符到Z
-	dec si
-	inc cx
-	jmp high_part_loop ; 继续处理DX中的高位部分
+end_conversion:
+    ; 恢复寄存器
+    pop cx
+    pop bx
+    pop si
+    pop dx
+    pop ax
 
-end_convert:
-	; 移动SI指针到字符串开头
-	add si, cx
-	; 将SI指向的第一个字符之前的空闲位置填充为'$'
-	cld
-	mov al, '$'
-	repne scasb
-	mov byte ptr [di-1], '$'
+    ; 显示结果（DOS功能调用）
+    lea dx, [di+1]   ; 正确获取字符串起始地址
+    mov ah, 9        ; 设置显示字符串功能号
+    int 21h          ; 调用DOS中断
 
-	pop si
-	pop bx
-	pop cx
-	ret
-to_str endp
+    ; 程序终止
+    mov ax, 4c00h    ; 设置终止程序功能号
+    int 21h          ; 调用DOS中断
+
+; 32位除以10的子程序（DX:AX / CX，返回商在DX:AX，余数在BL）
+div32 proc near
+    push di
+    push si
+
+    mov si, dx       ; 保存原始高16位
+    mov di, ax       ; 保存原始低16位
+
+    xor dx, dx       ; 清零DX
+    mov ax, si       ; AX = 高16位
+    div cx           ; 第一次除法：DX:AX / CX → 商1在AX，余数在DX
+    mov si, ax       ; 保存商1到SI
+
+    mov ax, di       ; AX = 原始低16位
+    ; 此时 DX:AX = (第一次余数 << 16) + 原始低16位
+    div cx           ; 第二次除法：DX:AX / CX → 商2在AX，余数在DX
+
+    mov bl, dl       ; 余数保存到BL（DX < CX，所以DL足矣）
+    mov dx, si       ; 商的高16位保存到DX
+    ; AX已包含商的低16位，无需操作
+
+    pop si
+    pop di
+    ret
+div32 endp
 
 code ends
-	end start
+end start
