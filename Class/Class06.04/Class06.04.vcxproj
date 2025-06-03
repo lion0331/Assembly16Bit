@@ -128,6 +128,8 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <None Include="T34-1.asm" />
+    <None Include="T34-2.asm" />
+    <None Include="T34-3.asm" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
