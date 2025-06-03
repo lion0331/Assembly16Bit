@@ -23,7 +23,7 @@ start:
 	mov ax,x
 	mov cl,4
 	shl ax,cl
-	;取高16位
+	;右移12位后，原数据的最高4位成为结果的最低4位，其余位为0
 	mov dx,x
 	mov cl,12
 	shr dx,cl
