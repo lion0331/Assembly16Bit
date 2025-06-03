@@ -24,5 +24,17 @@
     <None Include="T34-3.asm">
       <Filter>源文件</Filter>
     </None>
+    <None Include="T34-4.asm">
+      <Filter>源文件</Filter>
+    </None>
+    <None Include="T34-5.asm">
+      <Filter>源文件</Filter>
+    </None>
+    <None Include="T34-6.asm">
+      <Filter>源文件</Filter>
+    </None>
+    <None Include="T34-7.asm">
+      <Filter>源文件</Filter>
+    </None>
   </ItemGroup>
 </Project>
