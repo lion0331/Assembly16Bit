@@ -36,5 +36,14 @@
     <None Include="T34-7.asm">
       <Filter>源文件</Filter>
     </None>
+    <None Include="comple.asm">
+      <Filter>源文件</Filter>
+    </None>
+    <None Include="repbit.asm">
+      <Filter>源文件</Filter>
+    </None>
+    <None Include="repbit2.asm">
+      <Filter>源文件</Filter>
+    </None>
   </ItemGroup>
 </Project>
