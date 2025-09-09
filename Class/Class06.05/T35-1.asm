@@ -20,17 +20,17 @@ start:
 	mov cl,[si+2]
 	;第一次比较
 	cmp al,bl
-	jbe next1
+	jae next1
 	xchg al,bl
 
 next1:	;第二次比较
 	cmp al,cl
-	jbe next2
+	jae next2
 	xchg al,cl
 
 next2:	;第三次比较
 	cmp bl,cl
-	jbe next3
+	jae next3
 	xchg bl,cl
 	
 next3:	;保存结果
